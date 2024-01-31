@@ -121,10 +121,12 @@ pub fn shrink_ball(
     base: &Vector3D,
     normal: &Vector3D,
     tree: &TreeManager3D,
-) -> Result<f64, String> {
+    r_guess: Option<f64>,
+) -> Result<(f64, f64, f64, Option<Vector3D>), String> {
     let normal_unit = *normal * (1.0 / normal.length());
-    let extent = 2.0 * tree.extent;
-    let mut radius = extent;
+    let mut radius = r_guess.unwrap_or(2.0 * tree.extent);
+    let mut distance = radius;
+    let mut angle = 90.0;
 
     let mut remaining = 10;
     while remaining > 0 {
@@ -137,17 +139,18 @@ pub fn shrink_ball(
             Some(nearest) => {
                 // Point was contained in ball: Calc radius for a new ball on normal which touches base and near:
                 let base_to_near = nearest - base;
-                let next_radius =
-                    0.5 * base_to_near.dot(&base_to_near) / base_to_near.dot(&normal_unit);
-                radius = next_radius;
+                distance = base_to_near.length();
+                let projection = base_to_near.dot(&normal_unit) / distance;
+                angle = 2.0 * projection.acos().to_degrees();
+                radius = 0.5 * distance / projection;
             }
             //Termination condition: Ball is empty
             None => {
-                if radius == extent {
+                if radius >= 2.0 * tree.extent {
                     // radius > extent of geometry => No restriction to radius.
-                    return Ok(f64::INFINITY);
+                    return Ok((f64::INFINITY, f64::INFINITY, 180.0, None));
                 } else {
-                    return Ok(radius);
+                    return Ok((radius, distance, angle, Some(center)));
                 }
             }
         }
@@ -160,22 +163,57 @@ pub fn shrink_ball(
 }
 
 impl TreeManager3D {
-    pub fn eval_radii(&self) -> Vec<f64> {
-        let mut radii = vec![];
+    pub fn eval_radii(&self) -> (Vec<f64>, Vec<f64>, Vec<f64>) {
+        let mut radii: Vec<(&usize, f64)> = vec![];
+        let mut distances = vec![];
+        let mut angles = vec![];
+        let mut centers = String::new();
 
         for (index, element) in &self.index {
-            let radius = match shrink_ball(&element.point, &element.normal, self) {
-                Err(msg) => {
-                    println!("{}", msg);
-                    -1.0
-                }
-                Ok(radius) => radius,
-            };
+            let (radius, distance, angle, center) =
+                match shrink_ball(&element.point, &element.normal, self, None) {
+                    Err(msg) => {
+                        println!("{}", msg);
+                        (-1.0, -1.0, -90.0, None)
+                    }
+                    Ok(results) => results,
+                };
             radii.push((index, radius));
+            distances.push((index, distance));
+            angles.push((index, angle));
+            if let Some(point) = center {
+                centers.push_str(&format!("{} {} {}\n", point.i, point.j, point.k));
+            }
+        }
+
+        #[cfg(feature = "logmedials")]
+        {
+            use std::fs::OpenOptions;
+            use std::io::Write;
+
+            let path = format!(
+                "./output/log_medial_points_{}.xyz",
+                chrono::offset::Local::now().format("%H-%M-%S-%3f")
+            );
+            let mut file_handle = OpenOptions::new()
+                .write(true)
+                .create(true)
+                .open(path)
+                .expect("Unable to open file");
+
+            file_handle
+                .write_all(centers.as_bytes())
+                .expect("Unable to write data");
         }
 
         radii.sort_unstable_by_key(|tuple| tuple.0);
-        radii.iter().map(|tuple| tuple.1).collect()
+        distances.sort_unstable_by_key(|tuple| tuple.0);
+        angles.sort_unstable_by_key(|tuple| tuple.0);
+        (
+            radii.iter().map(|tuple| tuple.1).collect(),
+            distances.iter().map(|tuple| tuple.1).collect(),
+            angles.iter().map(|tuple| tuple.1).collect(),
+        )
     }
 }
 

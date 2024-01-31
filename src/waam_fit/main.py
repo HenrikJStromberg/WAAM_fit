@@ -1,9 +1,12 @@
 import sys
-import WAAMEvaluator
+from waam_fit import WAAMEvaluator
 
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+#if __name__ == '__main__':
+#    main()
+
+def main():    
     args = sys.argv
     if len(args) < 2:
         print('Please provide a path for the step file to process.\n')

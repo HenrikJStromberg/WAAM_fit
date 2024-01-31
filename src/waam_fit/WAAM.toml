@@ -1,0 +1,185 @@
+[features]
+# Available data types are radii.inner, radii.outer, gradients.inner, gradients.outer, angles.inner, angles.outer
+# If a filter is specified, only data which matches to the filter condition is plotted.
+# The attributes `min` and `max` limit  the range to which the color map is applied.
+[features.wall_thickness]
+name = "Abstände/Wanddicke"
+data = "distances.inner"
+max = 3.8                        # W_L
+filter = "parallel"
+style = "gradient_yellow_to_red"
+
+[features.gap]
+name = "Abstände/Zwischenraum"
+data = "distances.outer"
+max = 4.0                        # 1.1*W_L with W_L = 4.0
+filter = "parallel"
+style = "gradient_yellow_to_red"
+
+[features.inner_corner]
+name = "Kanten/Innen"
+data = "radii.inner"
+max = 4.8
+filter = "inner_corner"
+style = "gradient_yellow_to_red"
+
+[features.outer_corner]
+name = "Kanten/Außen"
+data = "radii.outer"
+max = 4.8
+filter = "outer_corner"
+style = "gradient_yellow_to_red"
+
+[features.inner_angle]
+name = "Winkel/Innen"
+data = "angles.inner"
+max = 20
+filter = "small_inner_distances"
+style = "gradient_yellow_to_red"
+
+[features.outer_angle]
+name = "Winkel/Außen"
+data = "angles.outer"
+max = 20
+filter = "small_outer_radii"
+style = "gradient_yellow_to_red"
+
+[features.gradient]
+name = "Gradient/Innen (Flächen)"
+data = "gradients.inner"
+min = 0.6
+filter = "parallel"
+style = "gradient_red_to_yellow"
+
+[features.gradient2]
+name = "Gradient/Innen (große Radien)"
+data = "gradients.inner"
+min = 0.6
+filter = "walls"
+style = "gradient_red_to_yellow"
+# For debugging purposes uncomment the following features to present raw data
+[features.db_radii_inner]
+name = "Debug/Kenngrößen/Innerer Radius"
+data = "radii.inner"
+
+[features.db_radii_outer]
+name = "Debug/Kenngrößen/Äußerer Radius"
+data = "radii.outer"
+
+[features.db_gradient_inner]
+name = "Debug/Kenngrößen/Innerer Gradient"
+data = "gradients.inner"
+
+#[features.db_gradient_outer]
+#name = "Debug/Kenngrößen/Äußerer Gradient"
+#data = "gradients.outer"
+
+[features.db_distances_inner]
+name = "Debug/Kenngrößen/Innerer Abstand"
+data = "distances.inner"
+
+[features.db_distances_outer]
+name = "Debug/Kenngrößen/Äußerer Abstand"
+data = "distances.outer"
+
+[features.db_angle_inner]
+name = "Debug/Kenngrößen/Innerer Winkel"
+data = "angles.inner"
+
+[features.db_angle_outer]
+name = "Debug/Kenngrößen/Äußerer Winkel"
+data = "angles.outer"
+
+[features.db_filter_parallel]
+name = "Debug/Filter/Parallele Flächen"
+data = "angles.inner"
+filter = "parallel"
+
+[features.db_filter_inner_corner]
+name = "Debug/Filter/Innere Ecken"
+data = "angles.inner"
+filter = "inner_corner"
+
+[features.db_filter_outer_corner]
+name = "Debug/Filter/Äußere Ecken"
+data = "angles.outer"
+filter = "outer_corner"
+
+[features.db_filter_small_inner_distance]
+name = "Debug/Filter/Kleine innere Abstände"
+data = "distances.inner"
+filter = "small_inner_distances"
+
+[features.db_filter_small_outer_radius]
+name = "Debug/Filter/Kleine äußere Radien"
+data = "radii.inner"
+filter = "small_outer_radii"
+
+[features.db_filter_walls]
+name = "Debug/Filter/Wände"
+data = "radii.inner"
+filter = "walls"
+
+[filter]
+# Configures filter for use on data in features
+[filter.parallel]
+data = "angles.inner"
+less_eq = 85
+greater_eq = 95
+
+[filter.inner_corner]
+# All non-parallel data
+data = "angles.inner"
+greater_eq = 75
+less_eq = 105
+
+[filter.outer_corner]
+data = "angles.outer"
+greater_eq = 75
+less_eq = 105
+
+[filter.small_inner_distances]
+data = "distances.inner"
+less_eq = 4
+
+[filter.small_outer_distances]
+data = "distances.outer"
+less_eq = 4
+
+[filter.small_outer_radii]
+data = "radii.outer"
+less_eq = 4
+
+[filter.walls]
+# All radii in the size of min. wall thickness or greater
+data = "radii.inner"
+greater_eq = 4.8
+less_eq = 0
+
+[styles]
+# Configuarates style settings for gmsh 
+# Options can be all sorts of options applicable for gmsh.view
+[styles.default]
+ColormapNumber = 4
+SaturateValues = 0
+ShowScale = 1
+
+[styles.gradient_yellow_to_red]
+ColormapAlpha = 1
+ColormapBias = 0
+ColormapCurvature = 0
+ColormapNumber = 16
+ColormapRotation = 0
+SaturateValues = 0
+ShowScale = 1
+RangeType = 2
+
+[styles.gradient_red_to_yellow]
+ColormapAlpha = 1
+ColormapBias = 0
+ColormapCurvature = 0
+ColormapNumber = 16
+ColormapSwap = 1
+SaturateValues = 0
+ShowScale = 1
+RangeType = 2

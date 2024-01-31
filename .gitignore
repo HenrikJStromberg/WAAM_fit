@@ -1,9 +1,13 @@
 __pycache__/*
+src/waam_fit/__pycache__/*
+src/waam_fit/*.so
+
 ressources/
 .vscode/
 output/*
 examples/*
 
 # Rust:
-/rust-methods/target
-/rust-methods/Cargo.lock
+/rust/target
+/rust/Cargo.lock
+

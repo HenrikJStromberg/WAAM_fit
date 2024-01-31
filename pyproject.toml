@@ -1,9 +1,6 @@
-[build-system]
-requires = ["maturin>=1.1,<2.0"]
-build-backend = "maturin"
-
 [project]
-name = "rust-methods"
+name = "waam_fit"
+dependencies = ["gmsh", "numpy"]
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Rust",
@@ -11,6 +8,13 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 
+[project.scripts]
+waam_fit = "waam_fit.main:main"
+
+[build-system]
+requires = ["maturin>=1.1,<2.0"]
+build-backend = "maturin"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+module-name = "waam_fit.rust_methods"

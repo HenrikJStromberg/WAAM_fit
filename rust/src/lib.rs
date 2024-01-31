@@ -11,7 +11,7 @@ fn get_sphere_radii(
     centers: PyReadonlyArray2<f64>,
     normals: PyReadonlyArray2<f64>,
     indices: Vec<u64>,
-) -> PyResult<Vec<f64>> {
+) -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>)> {
     if centers.len() != normals.len() {
         return Err(PyValueError::new_err(format!("The node_coordinates and normal_vectors matrices must have the same length. Found: {:?} and {:?}", centers.len(), normals.len())));
     }
